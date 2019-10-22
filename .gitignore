@@ -1,0 +1,26 @@
+## General
+
+# Ignore log files
+  *.log
+
+# Ignore Vim swap files
+  *.swp
+
+## Ignore files generated from build
+
+# Binaries
+  _*
+# C intermediaries
+  *.o
+  *.asm
+# Others
+  *.d
+  *.S
+  *.sym
+  *.img
+  bootblock
+  entryother
+  initcode
+  initcode.out
+  kernel
+  mkfs
