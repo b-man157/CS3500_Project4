@@ -89,3 +89,29 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+int
+sys_count_virtual_pages(void)
+{
+  return myproc()->sz / PGSIZE;
+}
+
+int
+sys_count_physical_pages(void)
+{
+  pde_t *pgdir = myproc()->pgdir;
+  pde_t *pde;
+  pte_t *pgtab;
+
+  int count = 0;
+  for (int va = 0; va < myproc()->sz; va += PGSIZE) {
+    pde = &pgdir[PDX(va)];
+    if (*pde & PTE_P) {
+      pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+      if (pgtab[PTX(va)] & PTE_P) {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
