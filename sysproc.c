@@ -45,14 +45,19 @@ sys_getpid(void)
 int
 sys_sbrk(void)
 {
-  int addr;
-  int n;
+  // int addr;
+  // int n;
 
-  if(argint(0, &n) < 0)
-    return -1;
-  addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+  // if(argint(0, &n) < 0)
+  //   return -1;
+  // addr = myproc()->sz;
+  // if(growproc(n) < 0)
+  //   return -1;
+  // return addr;
+
+  // Level 2 modifications
+  myproc()->sz += PGSIZE;
+  int addr = myproc()->sz;
   return addr;
 }
 
@@ -99,16 +104,17 @@ sys_count_virtual_pages(void)
 int
 sys_count_physical_pages(void)
 {
+  uint sz = myproc()->sz;
   pde_t *pgdir = myproc()->pgdir;
   pde_t *pde;
   pte_t *pgtab;
 
   int count = 0;
-  for (int va = 0; va < myproc()->sz; va += PGSIZE) {
+  for(int va = 0; va < sz; va += PGSIZE){
     pde = &pgdir[PDX(va)];
-    if (*pde & PTE_P) {
+    if(*pde & PTE_P){
       pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-      if (pgtab[PTX(va)] & PTE_P) {
+      if(pgtab[PTX(va)] & PTE_P){
         ++count;
       }
     }
