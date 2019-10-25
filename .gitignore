@@ -3,10 +3,8 @@
 # Ignore log files
   *.log
 
-# Ignore Vim swap files
-  *.swp
-
 ## Ignore files generated from build
+  .*.c.swp
 
 # Binaries
   _*
