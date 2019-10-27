@@ -88,7 +88,7 @@ trap(struct trapframe *tf)
     }
     // In user space, assume process misbehaved.
     
-    /* Add call to modified growproc() if trap 16 */
+    /* Add call to modified growproc() if trap 14 */
     cprintf("pid %d %s: trap %d err %d on cpu %d "
             "eip 0x%x addr 0x%x--kill proc\n",
             myproc()->pid, myproc()->name, tf->trapno,
