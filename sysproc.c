@@ -51,16 +51,8 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+  myproc()->sz = PGROUNDUP(addr + n);
   return addr;
-  // int addr;
-  // int n;
-  // if(argint(0, &n) < 0)
-  //   return -1;
-  // addr = myproc()->sz;
-  // myproc()->sz = PGROUNDUP(addr + n);
-  // return addr;
 }
 
 int
