@@ -47,7 +47,6 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -92,24 +91,25 @@ sys_uptime(void)
 int
 sys_count_virtual_pages(void)
 {
-  return myproc()->sz / PGSIZE;
+  return PGROUNDUP(myproc()->sz);
 }
 
 int
 sys_count_physical_pages(void)
 {
   int count = 0;
-  uint sz = myproc()->sz;
   pde_t *pgdir = myproc()->pgdir;
   pde_t *pde;
   pte_t *pgtab;
 
-  for(int va = 0; va < sz; va += PGSIZE){
-    pde = &pgdir[PDX(va)];
+  for(int i = 0; i < NPDENTRIES; i++){
+    pde = &pgdir[i];
     if(*pde & PTE_P){
       pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-      if(pgtab[PTX(va)] & PTE_P){
-        ++count;
+      for(int j = 0; j < NPTENTRIES; j++){
+        if(pgtab[j] & PTE_P){
+          ++count;
+        }
       }
     }
   }
