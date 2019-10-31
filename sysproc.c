@@ -47,11 +47,20 @@ sys_sbrk(void)
 {
   int addr;
   int n;
+
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  myproc()->sz = PGROUNDUP(addr + n);
+  if(growproc(n) < 0)
+    return -1;
   return addr;
+  // int addr;
+  // int n;
+  // if(argint(0, &n) < 0)
+  //   return -1;
+  // addr = myproc()->sz;
+  // myproc()->sz = PGROUNDUP(addr + n);
+  // return addr;
 }
 
 int
@@ -91,7 +100,7 @@ sys_uptime(void)
 int
 sys_count_virtual_pages(void)
 {
-  return PGROUNDUP(myproc()->sz);
+  return PGROUNDUP(myproc()->sz) / PGSIZE;
 }
 
 int
@@ -102,11 +111,11 @@ sys_count_physical_pages(void)
   pde_t *pde;
   pte_t *pgtab;
 
-  for(int i = 0; i < NPDENTRIES; i++){
+  for(int i = 0; i < NPDENTRIES; ++i){
     pde = &pgdir[i];
     if(*pde & PTE_P){
       pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-      for(int j = 0; j < NPTENTRIES; j++){
+      for(int j = 0; j < NPTENTRIES; ++j){
         if(pgtab[j] & PTE_P){
           ++count;
         }
