@@ -93,6 +93,7 @@ trap(struct trapframe *tf)
   if(tf->trapno == 14){
     int addr = rcr2();
     int a = PGROUNDDOWN(addr)/PGSIZE;
+    cprintf("Problematic Address : %d\n",addr);
     //Aloccate a page starting at address a*4096
     int c = allocuvm(myproc()->pgdir,a*PGSIZE,(a+1)*PGSIZE);
     if(c>0){
