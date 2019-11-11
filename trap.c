@@ -92,24 +92,15 @@ trap(struct trapframe *tf)
     if(tf->trapno == T_PGFLT){
       uint addr;
       uint a;
-      uint b;
       struct proc *curproc = myproc();
       
       addr = rcr2();
-      // cprintf("Problematic Address: %d\n", addr);
       a = PGROUNDDOWN(addr) / PGSIZE;
-      //Allocate a page starting at address a*PGSIZE
-      b = allocuvm(curproc->pgdir, a * PGSIZE, (a + 1) * PGSIZE);
-      switchuvm(curproc);
-      if(b > 0){
-        // cprintf("Allocation Successful\n");
-        // !!!!!!! Do Something Here
-        return;
-      }
-      else{
-        // cprintf("Allocation Failed\n");
+
+      if(allocuvm(curproc->pgdir, a * PGSIZE, (a + 1) * PGSIZE) == 0){
         curproc->killed = 1;
       }
+      switchuvm(curproc);
     }
     else{
       cprintf("pid %d %s: trap %d err %d on cpu %d "
