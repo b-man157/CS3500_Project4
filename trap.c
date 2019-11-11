@@ -88,31 +88,36 @@ trap(struct trapframe *tf)
     }
     // In user space, assume process misbehaved.
     
-    /* Add call to modified growproc() if trap 14 */
-
-  if(tf->trapno == 14){
-    int addr = rcr2();
-    int a = PGROUNDDOWN(addr)/PGSIZE;
-    cprintf("Problematic Address : %d\n",addr);
-    //Aloccate a page starting at address a*4096
-    int c = allocuvm(myproc()->pgdir,a*PGSIZE,(a+1)*PGSIZE);
-    if(c>0){
-      cprintf("Allocation Successful\n");
-      // !!!!!!! Do Something Here
-      return;
+    // In case of PGFLT, allocate the corresponding page.
+    if(tf->trapno == T_PGFLT){
+      uint addr;
+      uint a;
+      uint b;
+      struct proc *curproc = myproc();
+      
+      addr = rcr2();
+      // cprintf("Problematic Address: %d\n", addr);
+      a = PGROUNDDOWN(addr) / PGSIZE;
+      //Allocate a page starting at address a*PGSIZE
+      b = allocuvm(curproc->pgdir, a * PGSIZE, (a + 1) * PGSIZE);
+      switchuvm(curproc);
+      if(b > 0){
+        // cprintf("Allocation Successful\n");
+        // !!!!!!! Do Something Here
+        return;
+      }
+      else{
+        // cprintf("Allocation Failed\n");
+        curproc->killed = 1;
+      }
     }
     else{
-      cprintf("Allocation Failed\n");
+      cprintf("pid %d %s: trap %d err %d on cpu %d "
+              "eip 0x%x addr 0x%x--kill proc\n",
+              myproc()->pid, myproc()->name, tf->trapno,
+              tf->err, cpuid(), tf->eip, rcr2());
       myproc()->killed = 1;
     }
-  }
-  else{
-    cprintf("pid %d %s: trap %d err %d on cpu %d "
-            "eip 0x%x addr 0x%x--kill proc\n",
-            myproc()->pid, myproc()->name, tf->trapno,
-            tf->err, cpuid(), tf->eip, rcr2());
-    myproc()->killed = 1;
-  }
   }
 
   // Force process exit if it has been killed and is in user space.
